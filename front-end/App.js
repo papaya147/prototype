@@ -22,12 +22,12 @@ class App extends Component {
     });
 
     socket.on('ack', (data) => {
-      this.setState({ message: JSON.parse(data.data) });
+      this.setState({ message: JSON.parse(data).data });
     });
 
     setInterval(() => {
       this.setState({ data: Math.floor(Math.random() * 100), time: Date.now() })
-      socket.emit('telemetry', JSON.stringify(this.state.data))
+      socket.emit('telemetry', JSON.stringify({ data: this.state.data, time: this.state.time }))
     }, 3000)
 
     // You can also emit messages to the server

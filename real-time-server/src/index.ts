@@ -9,7 +9,7 @@ io.on('connection', (socket) => {
     socket.on('telemetry', async (arg: string) => {
         const data: IMessage = JSON.parse(arg)
 
-        console.log(`Received data via socket: ${arg}`)
+        console.log(`Received data via socket: data = ${data.data}, time = ${data.time}`)
 
         // produce data to Kafka 
         await KafkaService.produce(data, 'messages')
