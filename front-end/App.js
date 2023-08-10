@@ -15,18 +15,19 @@ class App extends Component {
 
   componentDidMount() {
     // Replace 'http://your-socket-server-url' with your actual WebSocket server URL
-    const socket = socketIOClient('http://your-socket-server-url');
+    const socket = socketIOClient('ws://65.1.194.238:4000');
 
     socket.on('connect', () => {
       console.log('Connected to server');
     });
 
-    socket.on('message', (data) => {
-      this.setState({ message: data.message });
+    socket.on('ack', (data) => {
+      this.setState({ message: JSON.parse(data.data) });
     });
 
     setInterval(() => {
       this.setState({ data: Math.floor(Math.random() * 100), time: Date.now() })
+      socket.emit('telemetry', JSON.stringify(this.state.data))
     }, 3000)
 
     // You can also emit messages to the server

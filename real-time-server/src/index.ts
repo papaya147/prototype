@@ -15,6 +15,6 @@ io.on('connection', (socket) => {
         await KafkaService.produce(data, 'messages')
         console.log('Data produced to Kafka queue')
 
-        socket.emit('ack', 'success')
+        socket.emit('ack', JSON.stringify(data))
     })
 })
