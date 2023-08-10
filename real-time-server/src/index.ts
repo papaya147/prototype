@@ -1,23 +1,20 @@
 import { Server } from 'socket.io'
-import { ITelemetry, createProducer } from './rabbit-service'
+import { IMessage, KafkaService } from './kafka-service'
 
 // create socket to receive data
 const io = new Server(4000)
 console.log('Socket created at port 4000')
 
-// start up the producer to send messages
-const producer = createProducer('amqp://localhost', 'messaging')
-console.log('Producer created to produce in amqp://localhost on queue "messaging"')
-
 io.on('connection', (socket) => {
-    socket.on('telemetry', (arg: string) => {
-        const data: ITelemetry = JSON.parse(arg)
+    socket.on('telemetry', async (arg: string) => {
+        const data: IMessage = JSON.parse(arg)
 
-        console.log(`Received data via socket: ${data.speed}`)
+        console.log(`Received data via socket: ${data.data}`)
 
-        producer(data)
+        // produce data to Kafka 
+        await KafkaService.produce(data, 'messages')
+        console.log('Data produced to Kafka queue')
 
         socket.emit('ack', 'success')
     })
-
 })

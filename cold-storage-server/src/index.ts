@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { createConsumer } from './rabbit-service'
+import { KafkaService } from './kafka-service'
 
 // create database connection
 const connect = async () => {
@@ -17,6 +17,14 @@ const connect = async () => {
 connect()
 
 // start up the consumer to consume messages
-const consumer = createConsumer('amqp://localhost', 'messaging')
-consumer()
-console.log('Consumer created to consume from amqp://localhost on queue "messaging"')
+const kafka_start = async () => {
+    let status = await KafkaService.consume('storage', ['messages'])
+    if (status.message === 'crashed')
+        kafka_start()
+    else
+        console.log('Connected to Kafka Brokers')
+    if (status.data)
+        console.log(`Received data: ${status.data}`)
+}
+
+kafka_start()
