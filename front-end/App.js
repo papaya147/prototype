@@ -9,20 +9,21 @@ class App extends Component {
     this.state = {
       message: '',
       data: 0,
-      time: Date.now()
+      time: Date.now(),
+      returnTime: 0
     };
   }
 
   componentDidMount() {
     // Replace 'http://your-socket-server-url' with your actual WebSocket server URL
-    const socket = socketIOClient('ws://65.1.194.238:4000');
+    const socket = socketIOClient('ws://13.200.109.200:4000');
 
     socket.on('connect', () => {
       console.log('Connected to server');
     });
 
     socket.on('ack', (data) => {
-      this.setState({ message: JSON.parse(data).data, time: Date.now() });
+      this.setState({ message: JSON.parse(data).data, returnTime: Date.now() });
     });
 
     setInterval(() => {
@@ -38,7 +39,8 @@ class App extends Component {
     return (
       <View style={styles.container}>
         <Text>Sending Message: data = {this.state.data}, time = {this.state.time}</Text>
-        <Text>WebSocket Message: data = {this.state.message}, time = {this.state.time}</Text>
+        <Text>WebSocket Message: data = {this.state.message}, time = {this.state.returnTime}</Text>
+        <Text>Turn Around Time: {this.state.returnTime - this.state.time}</Text>
       </View>
     );
   }

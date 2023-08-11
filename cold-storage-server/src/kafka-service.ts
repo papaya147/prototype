@@ -59,5 +59,6 @@ export class KafkaService {
 
     static async handleData(message: IMessage) {
         const telemetry = Telemetry.build(message)
+        await telemetry.save()
     }
 }
