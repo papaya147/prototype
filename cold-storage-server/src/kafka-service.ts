@@ -1,4 +1,5 @@
 import { Kafka, KafkaMessage, Partitioners } from "kafkajs";
+import { Telemetry } from "./telemetry.model";
 
 const kafka = new Kafka({
     brokers: ['adequate-anchovy-12371-eu1-kafka.upstash.io:9092'],
@@ -36,8 +37,6 @@ export class KafkaService {
             return { message: 'crashed' }
         })
 
-        const data: IMessage[] = []
-
         try {
             await consumer.connect()
             await consumer.subscribe({ topics, fromBeginning: true })
@@ -45,12 +44,20 @@ export class KafkaService {
             await consumer.run({
                 eachMessage: async ({ topic, partition, message }) => {
                     if (message.value?.toString())
-                        data.push(JSON.parse(message.value.toString()))
+                        switch (topic) {
+                            case 'messages':
+                                this.handleData(JSON.parse(message.value?.toString()))
+                                break
+                        }
                 }
             })
         } catch (e) {
             console.log({ errors: e })
         }
-        return { message: 'connected', data }
+        return { message: 'connected' }
+    }
+
+    static async handleData(message: IMessage) {
+        const telemetry = Telemetry.build(message)
     }
 }

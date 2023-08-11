@@ -22,7 +22,7 @@ class App extends Component {
     });
 
     socket.on('ack', (data) => {
-      this.setState({ message: JSON.parse(data).data });
+      this.setState({ message: JSON.parse(data).data, time: Date.now() });
     });
 
     setInterval(() => {
@@ -38,7 +38,7 @@ class App extends Component {
     return (
       <View style={styles.container}>
         <Text>Sending Message: data = {this.state.data}, time = {this.state.time}</Text>
-        <Text>WebSocket Message: {this.state.message}</Text>
+        <Text>WebSocket Message: data = {this.state.message}, time = {this.state.time}</Text>
       </View>
     );
   }

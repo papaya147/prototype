@@ -2,12 +2,12 @@ import mongoose from 'mongoose'
 
 interface telemetryAttrs {
     time: Date
-    speed: number
+    data: number
 }
 
 interface TelemetryDocument extends mongoose.Document {
     time: Date
-    speed: number
+    data: number
 }
 
 interface TelemetryModel extends mongoose.Model<TelemetryDocument> {
@@ -19,7 +19,7 @@ const telemetrySchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    speed: {
+    data: {
         type: Number,
         required: true
     }

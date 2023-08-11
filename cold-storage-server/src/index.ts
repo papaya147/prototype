@@ -23,8 +23,6 @@ const kafka_start = async () => {
         kafka_start()
     else
         console.log('Connected to Kafka Brokers')
-    if (status.data)
-        console.log(`Received data: ${status.data}`)
 }
 
 kafka_start()
