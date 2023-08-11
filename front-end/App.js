@@ -16,7 +16,7 @@ class App extends Component {
 
   componentDidMount() {
     // Replace 'http://your-socket-server-url' with your actual WebSocket server URL
-    const socket = socketIOClient('ws://13.200.109.200:4000');
+    const socket = socketIOClient('ws://3.111.94.212:4000');
 
     socket.on('connect', () => {
       console.log('Connected to server');
