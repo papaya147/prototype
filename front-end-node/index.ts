@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client'
 
-const socket = io('ws://43.205.122.26:4000')
+const socket = io('ws://prototype-lb-19672608.ap-south-1.elb.amazonaws.com:4000')
 
 setInterval(() => {
     const sendData = {

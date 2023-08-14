@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import { KafkaService } from './kafka-service'
+import express from 'express'
 
 // create database connection
 const connect = async () => {
@@ -26,3 +27,13 @@ const kafka_start = async () => {
 }
 
 kafka_start()
+
+const app = express()
+
+app.get('/health', (req, res) => {
+    res.sendStatus(200)
+})
+
+app.listen(4000, () => {
+    console.log('Cold storage server running on port 4000')
+})

@@ -1,11 +1,11 @@
 import { Kafka, KafkaMessage, Partitioners } from "kafkajs";
 
 const kafka = new Kafka({
-    brokers: ['adequate-anchovy-12371-eu1-kafka.upstash.io:9092'],
+    brokers: ['pkc-41p56.asia-south1.gcp.confluent.cloud:9092'],
     sasl: {
-        mechanism: 'scram-sha-256',
-        username: 'YWRlcXVhdGUtYW5jaG92eS0xMjM3MSQwl0sMEaYfw3sxnQv1yUfPExdOBr7n-nI',
-        password: 'a74f1e7b4d864ba4ae4b8ffca7a8b88c'
+        mechanism: 'plain',
+        username: 'UKIAIS55B4VDG7RH',
+        password: 'nws9Ep4BSpTrIlukaFNi21wg2O9/QkYQnKQ8B2hduu+8tbfwpiphC2x9kz/t78Mw'
     },
     ssl: true,
 })
