@@ -33,9 +33,9 @@ func ProduceMessage(producer sarama.AsyncProducer, topic string, message string)
 		for {
 			select {
 			case err := <-producer.Errors():
-				log.Println("failed to produce message:", err.Err)
+				log.Println("Kafka          : failed to produce message:", err.Err)
 			case success := <-producer.Successes():
-				log.Println("message sent successfully:", success.Offset)
+				log.Println("Kafka          : message sent successfully:", success.Offset)
 			}
 		}
 	}()

@@ -3,10 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-	"time"
 
-	"github.com/IBM/sarama"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -29,7 +26,7 @@ func Connect() (mqtt.Client, error) {
 }
 
 func Publish(client mqtt.Client, message []byte) error {
-	token := client.Publish(topic, 0, false, message)
+	token := client.Publish(acknowledgeTopic, 0, false, message)
 	token.Wait()
 	if token.Error() != nil {
 		return token.Error()
@@ -51,25 +48,20 @@ type Data struct {
 	Longitude   float64 `json:"longitude,omitempty"`
 }
 
-var payload JSONPayload
+var jsonPayload JSONPayload
 
-func Subscribe(client mqtt.Client, producer sarama.AsyncProducer) (mqtt.Token, error) {
-	token := client.Subscribe(topic, 0, func(client mqtt.Client, msg mqtt.Message) {
-		log.Printf("received message: %s from topic: %s", msg.Payload(), msg.Topic())
-		json.Unmarshal(msg.Payload(), &payload)
-		log.Printf("sent time: %d, received time: %d", payload.Time, time.Now().Unix())
-
-		ProduceMessage(producer, "mqtt-sink", string(msg.Payload()))
-	})
-	token.Wait()
-	if token.Error() != nil {
-		return nil, token.Error()
+func Subscribe(client mqtt.Client, messageChannel chan JSONPayload) error {
+	if token := client.Subscribe(telemetryTopic, 0, func(client mqtt.Client, msg mqtt.Message) {
+		json.Unmarshal(msg.Payload(), &jsonPayload)
+		messageChannel <- jsonPayload
+	}); token.Wait() && token.Error() != nil {
+		return token.Error()
 	}
-	return token, nil
+	return nil
 }
 
 func Unsubscribe(client mqtt.Client) {
-	client.Unsubscribe(topic)
+	client.Unsubscribe(telemetryTopic)
 }
 
 func Disconnect(client mqtt.Client, millis uint) {

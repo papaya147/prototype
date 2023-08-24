@@ -1,8 +1,8 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"log"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
@@ -26,7 +26,7 @@ func Connect() (mqtt.Client, error) {
 }
 
 func Publish(client mqtt.Client, message []byte) error {
-	token := client.Publish(topic, 0, false, message)
+	token := client.Publish(telemetryTopic, 0, false, message)
 	token.Wait()
 	if token.Error() != nil {
 		return token.Error()
@@ -34,20 +34,22 @@ func Publish(client mqtt.Client, message []byte) error {
 	return nil
 }
 
-func Subscribe(client mqtt.Client) (mqtt.Token, error) {
-	token := client.Subscribe(topic, 0, func(client mqtt.Client, msg mqtt.Message) {
-		log.Printf("received message: %s from topic: %s", msg.Payload(), msg.Topic())
+var jsonPayload JSONPayload
 
+func Subscribe(client mqtt.Client, messageChannel chan JSONPayload) error {
+	token := client.Subscribe(acknowledgeTopic, 0, func(client mqtt.Client, msg mqtt.Message) {
+		json.Unmarshal(msg.Payload(), &jsonPayload)
+		messageChannel <- jsonPayload
 	})
 	token.Wait()
 	if token.Error() != nil {
-		return nil, token.Error()
+		return token.Error()
 	}
-	return token, nil
+	return nil
 }
 
 func Unsubscribe(client mqtt.Client) {
-	client.Unsubscribe(topic)
+	client.Unsubscribe(acknowledgeTopic)
 }
 
 func Disconnect(client mqtt.Client, millis uint) {
