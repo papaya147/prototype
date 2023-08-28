@@ -1,13 +1,14 @@
 MQTTCLIENT_BINARY=mqttClientApp
 MQTTSERVER_BINARY=mqttServerApp
 STORAGESERVER_BINARY=storageServerApp
+ANALYTICSSERVER_BINARY=analyticsServerApp
 
 up:
 	@echo "Starting docker images..."
 	docker-compose up -d
 	@echo "Docker images started!"
 
-up_build: build_mqtt_client build_mqtt_server build_storage_server
+up_build: build_mqtt_client build_mqtt_server build_storage_server build_analytics_server
 	@echo "Stopping docker images (if running...)"
 	docker-compose down
 	@echo "Building and starting docker images..."
@@ -32,4 +33,9 @@ build_mqtt_server:
 build_storage_server:
 	@echo "Building storage server binary..."
 	cd ../storage-server && env GOOS=linux CGO_ENABLED=0 go build -o ${STORAGESERVER_BINARY} ./cmd/api
+	@echo "Done!"
+
+build_analytics_server:
+	@echo "Building analytics server binary..."
+	cd ../analytics-server && env GOOS=linux CGO_ENABLED=0 go build -o ${ANALYTICSSERVER_BINARY} ./cmd/api
 	@echo "Done!"

@@ -45,3 +45,12 @@ services:
       replicas: 1
     environment:
       - PARTITION="0"
+
+  analytics-server:
+    build:
+      context: ./../analytics-server
+      dockerfile: ./../analytics-server/.dockerfile
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1

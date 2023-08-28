@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: storage-server
 spec:
+  replicas: 6
   selector:
     matchLabels:
       app: storage-server
@@ -23,6 +24,8 @@ spec:
               cpu: "500m"
           env:
             - name: PARTITION
-              value: "0"
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['deployment.kubernetes.io/revision']
           ports:
             - containerPort: 80

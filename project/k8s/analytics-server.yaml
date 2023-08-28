@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-server
+spec:
+  selector:
+    matchLabels:
+      app: analytics-server
+  template:
+    metadata:
+      labels:
+        app: analytics-server
+    spec:
+      containers:
+        - name: analytics-server
+          image: papaya147/analytics-server:latest
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytics-server
+spec:
+  selector:
+    app: analytics-server
+  ports:
+    - port: 8080
+      targetPort: 8080

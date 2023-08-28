@@ -42,6 +42,20 @@ func main() {
 	session := createScyllaSession()
 	defer session.Close()
 
+	err := CreateScyllaKeyspace(session)
+	if err != nil {
+		log.Panicln("error creating keyspace: ", err)
+	} else {
+		log.Println("keyspace created successfully!")
+	}
+
+	err = CreateScyllaTable(session)
+	if err != nil {
+		log.Panicln("error creating table: ", err)
+	} else {
+		log.Println("table created successfully!")
+	}
+
 	var jsonPayload JSONPayload
 	var telemetry Telemetry
 
@@ -75,13 +89,12 @@ var counts = 0
 
 func createScyllaSession() *gocql.Session {
 	for {
-		CreateScyllaKeyspace(gocql.Quorum, "main", "mqtt-storage-test")
-		session, err := CreateScyllaSessionWithTable(gocql.Quorum, "main", "mqtt-storage-test")
+		session, err := CreateScyllaSession()
 		if err != nil {
 			log.Println("scylla session not yet ready...")
 			counts++
 		} else {
-			log.Println("scylla keyspace created and session connected to Cassandra!")
+			log.Println("scylla session connected to ScyllaDB!")
 
 			return session
 		}

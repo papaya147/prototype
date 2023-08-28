@@ -2,26 +2,53 @@ package main
 
 import (
 	"github.com/gocql/gocql"
+	"github.com/gocql/gocql/scyllacloud"
 	"github.com/scylladb/gocqlx"
 	"github.com/scylladb/gocqlx/qb"
 	"github.com/scylladb/gocqlx/table"
 )
 
-const connectionBundlePath = "./connect-bundle-mqtt-storage-test.yml"
+const (
+	connectionBundlePath = "./connect-bundle-mqtt-storage-test.yml"
+)
 
-// query := `
-//         CREATE TABLE IF NOT EXISTS telemetry (
-//             time BIGINT,
-//             battery_temp INT,
-//             speed INT,
-//             latitude DOUBLE,
-//             longitude DOUBLE,
-//             PRIMARY KEY (time)
-//         )
-//     `
+var stmts *statements = createStatements()
 
-func CreateScyllaSession() *gocql.Session {
-	cluster, err := scyllacloud
+func CreateScyllaSession() (*gocql.Session, error) {
+	cluster, err := scyllacloud.NewCloudCluster(connectionBundlePath)
+	if err != nil {
+		return nil, err
+	}
+	cluster.PoolConfig.HostSelectionPolicy = gocql.DCAwareRoundRobinPolicy("us-east-1")
+
+	session, err := cluster.CreateSession()
+	if err != nil {
+		return nil, err
+	}
+
+	return session, nil
+}
+
+func CreateScyllaKeyspace(session *gocql.Session) error {
+	query := `
+		CREATE KEYSPACE IF NOT EXISTS mqtt_storage 
+		WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};
+	`
+	return session.Query(query).Exec()
+}
+
+func CreateScyllaTable(session *gocql.Session) error {
+	query := `
+        CREATE TABLE IF NOT EXISTS mqtt_storage.telemetry (
+            time BIGINT,
+            battery_temp INT,
+            speed INT,
+            latitude DOUBLE,
+            longitude DOUBLE,
+            PRIMARY KEY (time)
+        )
+    `
+	return session.Query(query).Exec()
 }
 
 type query struct {
@@ -45,7 +72,7 @@ type Telemetry struct {
 
 func createStatements() *statements {
 	metadata := table.Metadata{
-		Name:    "telemetry",
+		Name:    "mqtt_storage.telemetry",
 		Columns: []string{"time", "battery_temp", "speed", "latitude", "longitude"},
 		PartKey: []string{"time"},
 	}
@@ -73,8 +100,6 @@ func createStatements() *statements {
 		},
 	}
 }
-
-var stmts *statements = createStatements()
 
 func InsertQuery(session *gocql.Session, telemetry *Telemetry) error {
 	err := gocqlx.Query(session.Query(stmts.ins.stmt), stmts.ins.names).BindStruct(telemetry).ExecRelease()
