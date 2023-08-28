@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage-server
+spec:
+  selector:
+    matchLabels:
+      app: storage-server
+  template:
+    metadata:
+      labels:
+        app: storage-server
+    spec:
+      containers:
+        - name: storage-server
+          image: papaya147/storage-server:latest
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          env:
+            - name: PARTITION
+              value: "0"
+          ports:
+            - containerPort: 80

@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt-client
+spec:
+  selector:
+    matchLabels:
+      app: mqtt-client
+  template:
+    metadata:
+      labels:
+        app: mqtt-client
+    spec:
+      containers:
+        - name: mqtt-client
+          image: papaya147/mqtt-client:latest
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          env:
+            - name: HIVEMQ_USERNAME
+              value: papaya
+            - name: HIVEMQ_PASSWORD
+              value: something
+            - name: HIVEMQ_BROKER_URL
+              value: ecfd1263e29f4248b00d94e4735d8ffb.s2.eu.hivemq.cloud
+            - name: HIVEMQ_BROKER_PORT
+              value: "8883"
+            - name: MQTT_CLIENTID
+              value: mqtt-publisher
+            - name: MQTT_TELEMETRY_TOPIC
+              value: topic/test
+            - name: MQTT_ACK_TOPIC
+              value: topic/ack
+          ports:
+            - containerPort: 80

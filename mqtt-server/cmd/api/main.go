@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 
@@ -22,23 +21,16 @@ func main() {
 	// load environment variables from the .env file
 	LoadEnv()
 
-	producer, err := CreateProducer()
-	if err != nil {
-		log.Panic("producer creation failed")
-	} else {
-		log.Println("producer created")
-	}
+	producer := createKafkaProducer()
 	defer producer.Close()
 
-	client, err := Connect()
-	if err != nil {
-		log.Panicf("error connecting to MQTT broker: %s", err)
-	}
-	log.Println("connected to MQTT broker")
+	ProduceMessage(producer, "test", "test", "test")
+
+	client := createMQTTClient()
 
 	messageChannel := make(chan JSONPayload)
 
-	err = Subscribe(client, messageChannel)
+	err := Subscribe(client, messageChannel)
 	if err != nil {
 		log.Panic("error subscribing to MQTT topic")
 	}
@@ -53,8 +45,54 @@ func main() {
 			msgBytes, _ = json.Marshal(msgJSON)
 			handleMessageReceived(msgBytes, producer, client)
 		case <-time.After(time.Second * 5): // Wait for 5 seconds if no message is received
-			fmt.Println("MQTT, telemetry: no message received in the last 5 seconds")
+			log.Println("MQTT, telemetry: no message received in the last 5 seconds")
 		}
+	}
+}
+
+var counts = 0
+
+func createMQTTClient() mqtt.Client {
+	for {
+		client, err := Connect()
+		if err != nil {
+			log.Println("MQTT not yet ready...")
+			counts++
+		} else {
+			log.Println("connected to MQTT!")
+			return client
+		}
+
+		if counts > 10 {
+			log.Println(err)
+			return nil
+		}
+
+		log.Println("backing off for two seconds...")
+		time.Sleep(2 * time.Second)
+		continue
+	}
+}
+
+func createKafkaProducer() sarama.AsyncProducer {
+	for {
+		prod, err := CreateProducer()
+		if err != nil {
+			log.Println("Kafka not yet ready...")
+			counts++
+		} else {
+			log.Println("connected to Kafka!")
+			return prod
+		}
+
+		if counts > 10 {
+			log.Println(err)
+			return nil
+		}
+
+		log.Println("backing off for two seconds...")
+		time.Sleep(2 * time.Second)
+		continue
 	}
 }
 
@@ -63,7 +101,7 @@ func handleMessageReceived(msgString []byte, producer sarama.AsyncProducer, clie
 	log.Printf("MQTT, telemetry: received message: %s\n", string(msgString))
 
 	// push message to kafka
-	ProduceMessage(producer, "mqtt-sink", string(msgString))
+	ProduceMessage(producer, "mqtt-sink-topic", string(msgString), string(msgString))
 
 	// send ack to MQTT
 	err := Publish(client, msgString)

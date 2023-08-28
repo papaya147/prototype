@@ -1,0 +1,20 @@
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: scylla-ingress
+#   labels:
+#     name: scylla-ingress
+#   annotations:
+#     nginx.ingress.kubernetes.io/rewrite-target: /$1
+# spec:
+#   rules:
+#     - host: scylla.test
+#       http:
+#         paths:
+#           - pathType: Prefix
+#             path: /(.*)
+#             backend:
+#               service:
+#                 name: scylla-cluster
+#                 port:
+#                   number: 9042

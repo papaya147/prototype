@@ -35,15 +35,11 @@ func main() {
 	// load environment variables from the .env file
 	LoadEnv()
 
-	client, err := Connect()
-	if err != nil {
-		log.Panicf("error connecting to MQTT broker: %s", err)
-	}
-	log.Println("connected to MQTT broker")
+	client := createMQTTClient()
 
 	messageChannel := make(chan JSONPayload)
 
-	err = Subscribe(client, messageChannel)
+	err := Subscribe(client, messageChannel)
 	if err != nil {
 		log.Panic("error subscribing to MQTT topic")
 	}
@@ -52,13 +48,40 @@ func main() {
 
 	go publishOnMain(client)
 
-	var msgBytes []byte
+	logMessageReceived(messageChannel)
+}
 
+var counts = 0
+
+func createMQTTClient() mqtt.Client {
+	for {
+		client, err := Connect()
+		if err != nil {
+			log.Println("MQTT not yet ready...")
+			counts++
+		} else {
+			log.Println("connected to MQTT!")
+			return client
+		}
+
+		if counts > 10 {
+			log.Println(err)
+			return nil
+		}
+
+		log.Println("backing off for two seconds...")
+		time.Sleep(2 * time.Second)
+		continue
+	}
+}
+
+func logMessageReceived(messageChannel chan JSONPayload) {
+	var msgBytes []byte
 	for {
 		select {
 		case msgJSON := <-messageChannel:
 			msgBytes, _ = json.Marshal(msgJSON)
-			log.Println("MQTT, ack      : message received: ", string(msgBytes))
+			log.Println("MQTT, ack      : message received: ", string(msgBytes), time.Now().UnixMilli())
 		case <-time.After(time.Second * 5): // Wait for 5 seconds if no message is received
 			log.Println("MQTT, ack      : no message received in the last 5 seconds")
 		}
@@ -76,7 +99,7 @@ func publishOnMain(client mqtt.Client) {
 				Latitude:    rand.Float64() * 10,
 				Longitude:   rand.Float64() * 10,
 			},
-			Time: time.Now().Unix(),
+			Time: time.Now().UnixMilli(),
 		}
 
 		msg, _ := json.Marshal(jsonPayload)
@@ -86,6 +109,6 @@ func publishOnMain(client mqtt.Client) {
 		} else {
 			log.Printf("MQTT, telemetry:published message: %s\n", msg)
 		}
-		time.Sleep(time.Second)
+		time.Sleep(5 * time.Second)
 	}
 }
