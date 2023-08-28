@@ -15,3 +15,9 @@ If you're using minikube, make sure your addons have ingress enabled:
 Also use the ngrok tunnel provided by it:
 
     minikube tunnel
+
+Don't want to use Kubernetes, try it out with Docker instead! Just run the following command to run the docker-compose file by compiled locally:
+
+    make up_build
+
+Or run the docker-compose.yaml directly by pulling my images from [Docker Hub](hub.docker.com/papaya147)!
