@@ -6,7 +6,7 @@ This code can be executed with Kubernetes by navigating to the project folder wi
 
 This will apply all the files in the k8s directory on your local machine.
 
-The data can be viewed in your browser by visiting [prototype.com](prototype.com). Don't forget to add prototype.com to localhost on your /etc/hosts file before visiting the URL!
+The data can be viewed in your browser by visiting [prototype.com](http://prototype.com). Don't forget to add prototype.com to localhost on your /etc/hosts file before visiting the URL!
 
 If you're using minikube, make sure your addons have ingress enabled:
 
@@ -20,4 +20,4 @@ Don't want to use Kubernetes, try it out with Docker instead! Just run the follo
 
     make up_build
 
-Or run the docker-compose.yaml directly by pulling my images from [Docker Hub](hub.docker.com/papaya147)!
+Or run the docker-compose.yaml directly by pulling my images from [Docker Hub](http://hub.docker.com/papaya147)!
