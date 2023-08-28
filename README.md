@@ -20,4 +20,4 @@ Don't want to use Kubernetes, try it out with Docker instead! Just run the follo
 
     make up_build
 
-Or run the docker-compose.yaml directly by pulling my images from [Docker Hub](http://hub.docker.com/papaya147)!
+Or run the docker-compose.yaml directly by pulling my images from [Docker Hub](https://hub.docker.com/u/papaya147)!
